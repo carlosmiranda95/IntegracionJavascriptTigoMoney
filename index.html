@@ -1,0 +1,92 @@
+<script src="CryptoJSv3.1.2/rollups/tripledes.js"></script>
+<script src="CryptoJSv3.1.2/components/mode-ecb.js"></script>
+<script src="CryptoJSv3.1.2/components/pad-zeropadding.js"></script>
+<script src="CryptoJSv3.1.2/components/enc-base64.js"></script>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.js"
+  integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE="
+  crossorigin="anonymous"></script>
+<script type="text/javascript" src="jquery.soap.js"></script>
+<script>
+
+    function encryptByDES(message, key) {
+
+    var keyHex = CryptoJS.enc.Utf8.parse(key);
+ 
+    var encrypted = CryptoJS.TripleDES.encrypt(message, keyHex, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.ZeroPadding 
+    });
+
+    return encrypted.ciphertext.toString(CryptoJS.enc.Base64);
+
+    }
+
+    function decryptByDES(message, key) {
+
+        var keyHex = CryptoJS.enc.Utf8.parse(key);
+            // direct decrypt ciphertext
+        var decrypted = CryptoJS.TripleDES.decrypt({
+            ciphertext: CryptoJS.enc.Base64.parse(message)
+        }, keyHex, {
+            mode: CryptoJS.mode.ECB,
+            padding: CryptoJS.pad.ZeroPadding
+        });
+        
+        return decrypted.toString(CryptoJS.enc.Utf8);
+    }
+
+    var identification_key = "d68e0fb347d5bd3e3425214b7f5b2832068c87f7a522b5366acda48d5b8a9aa70ece91955a94a6957691eaa1f8e5b7dbe6d842a53ccfebc5e5c9f6d7305178d2";
+
+    var key = "F4EVJ7KB2P21O1G9NYR2T4RC";
+
+    var parametros = "pv_nroDocumento=55488541;pv_linea=69178351;pv_monto=91;pv_orderId=15963;pv_nombre=carlosv;pv_confirmacion=Tigo Money;pv_notificacion=a Tigo Money;pv_urlCorrecto=;pv_urlError=;pv_items=*i1|50|Producto-1|50|50*i2|2|Producto-2|31|62;pv_razonSocial=carlosSRL;pv_nit=48489859";
+
+    var dataEncrypt = encryptByDES(parametros, key);
+    var parameters = dataEncrypt.toString();
+    //document.domain = "http://localhost"; 
+    $.soap({
+/*
+    headers: {
+   'Access-Control-Allow-Origin' : 'http://localhost',
+   },
+   */
+   
+    HTTPHeaders: {
+    
+            Authorization: 'auth',
+            //origin: 'http://localhost',
+            //document.domain = "http://localhost" 
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers':'Origin, Content-Type, X-Auth-Token'
+            //Authorization: 'none',
+            //Host: 'http://localhost',
+            //Origin: 'http://localhost'
+        },
+    
+        url: 'http://190.129.208.178:96/PasarelaServices/CustomerServices?wsdl',
+
+        method: 'solicitarPago',
+
+        data: {
+            key: identification_key,
+            parametros: parameters
+        },
+
+        success: function (soapResponse) {
+            // do stuff with soapResponse
+            // if you want to have the response as JSON use soapResponse.toJSON();
+            // or soapResponse.toString() to get XML string
+            // or soapResponse.toXML() to get XML DOM
+            console.log("llega");
+        },
+        error: function (SOAPResponse) {
+            // show error
+        }
+    });
+
+    console.log(parameters);
+    console.log(decryptByDES(parameters,key));
+ 
+</script>
